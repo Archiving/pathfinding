@@ -1,8 +1,7 @@
 
 
-<snippet>
-  <content><![CDATA[
-# ${Robotics Pathfinder}
+
+#Robotics Pathfinder
 Graphical User Interface that writes into a grid file for robot pathfinding.
 ## Installation
 
