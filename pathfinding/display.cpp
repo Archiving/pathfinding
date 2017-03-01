@@ -4,6 +4,8 @@ float dim;
 
 point** grid;
 
+void drawColoredCell(float bound, int i, int j);
+
 //Note that size is the dimensions of the grid where gridSize is the size of the grid on the screen (e.x. a 2.0f grid with a dimension of 20x20 would be display(...., 20, 2.0f);
 void display(int argc, char** argv, float g_dim, float grid_Sz) {
 	//Assign grid, sz and grid_Sz`
@@ -69,6 +71,8 @@ void key_callback(unsigned char key, int x, int y) {
 	const int C = 99;
 	const int ZERO = 48;
 	const int ONE = 49;
+	const int G = 103;
+	const int R = 114;
 
 	switch (key) {
 	case ESC:
@@ -112,13 +116,45 @@ void key_callback(unsigned char key, int x, int y) {
 		cursorY += (gridSize * 2) / dim;
 		break;
 	case SPACE:
-		grid[position.x][position.y].blocked = grid[position.x][position.y].blocked ? false : true;
+		grid[position.x][position.y].blocked = !grid[position.x][position.y].blocked;
 		printf("You changed the position (%d, %d) to being %s\n", position.x, position.y, (grid[position.x][position.y].blocked) ? "blocked" : "unblocked");
 
 		ui::saveGrid(grid, dim);
 		break;
 	case ONE:
 		printf("You are @ position: (%d, %d)\n", position.x, position.y);
+		break;
+	case G:
+		grid[position.x][position.y].isGoal = !grid[position.x][position.y].isGoal;
+
+		/* If there are any OTHER cells apart from the one we just set that are a goal...*/
+		for (int i = 0; i < dim; i++) {
+			for (int j = 0; j < dim; j++) {
+				if (grid[j][i].isGoal) {
+					if (grid[j][i].x != grid[position.x][position.y].x && grid[j][i].y != grid[position.x][position.y].y) {
+						printf("You cannot set more than one goal!\n");
+						grid[position.x][position.y].isGoal = false;
+					}
+				}
+			}
+		}
+		printf("You set the position: (%d, %d) to %s being a goal cell.\n", position.x, position.y, grid[position.x][position.y].isGoal ? "" : "not");
+		ui::saveGrid(grid, dim);
+		break;
+	case R:
+		grid[position.x][position.y].isRobotPos = !grid[position.x][position.y].isRobotPos;
+		for (int i = 0; i < dim; i++) {
+			for (int j = 0; j < dim; j++) {
+				if (grid[j][i].isRobotPos) {
+					if (grid[j][i].x != grid[position.x][position.y].x && grid[j][i].y != grid[position.x][position.y].y) {
+						printf("You cannot set more than one robot position!\n");
+						grid[position.x][position.y].isRobotPos = false;
+					}
+				}
+			}
+		}
+		printf("You set the position: (%d, %d) to %s being a robot intial cell.\n", position.x, position.y, grid[position.x][position.y].isRobotPos ? "" : "not");
+		ui::saveGrid(grid, dim);
 		break;
 	}
 }
@@ -208,11 +244,12 @@ void render_callback() {
 	glVertex3f(-bound + 0.01f + cursorX, bound - ((bound * 2) / dim) + 0.01f + cursorY, -5.0f);
 	glEnd();
 
-	//Draw any blocked cells *NOTE* the square order vertex matters!
+	//Draw any blocked or goal cells *NOTE* the square order vertex matters!
 	for (int i = 0; i < dim; i++) {
 		for (int j = 0; j < dim; j++) {
 			if (grid[j][i].blocked) {
 				glColor3f(1, 0, 0);
+				/*
 				glBegin(GL_POLYGON);
 				//top left
 				glVertex3f(-bound + j*((bound * 2) / dim) + 0.01f,
@@ -233,6 +270,17 @@ void render_callback() {
 							-5.0f);
 
 				glEnd();
+				*/
+				drawColoredCell(bound, i, j);
+				
+			}
+			else if (grid[j][i].isGoal) {
+				glColor3f(1, 0.9, 0.2);
+				drawColoredCell(bound, i, j);
+			}
+			else if (grid[j][i].isRobotPos) {
+				glColor3f(0, 0, 1);
+				drawColoredCell(bound, i, j);
 			}
 		}
 	}
@@ -261,4 +309,27 @@ void resize(int w, int h) {
 
 	//Get Back to the Modelview
 	glMatrixMode(GL_MODELVIEW);
+}
+
+void drawColoredCell(float bound, int i, int j) {
+	glBegin(GL_POLYGON);
+	//top left
+	glVertex3f(-bound + j*((bound * 2) / dim) + 0.01f,
+		bound - i*((bound * 2) / dim) - 0.01f,
+		-5.0f);
+
+	//top right
+	glVertex3f(-bound + (j + 1)*((bound * 2) / dim) - 0.01f,
+		bound - i*((bound * 2) / dim) - 0.01f,
+		-5.0f);
+
+	//bottom right
+	glVertex3f(-bound + (j + 1)*((bound * 2) / dim) - 0.01f, bound - (i + 1)*((bound * 2) / dim) + 0.01f, -5.0f);
+
+	//bottom left
+	glVertex3f(-bound + j*((bound * 2) / dim) + 0.01f,
+		bound - (i + 1)*((bound * 2) / dim) + 0.01f,
+		-5.0f);
+
+	glEnd();
 }

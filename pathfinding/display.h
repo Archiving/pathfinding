@@ -12,6 +12,8 @@ struct point {
 	int x = 0;
 	int y = 0;
 	bool blocked;
+	bool isGoal = false;
+	bool isRobotPos = false;
 	int red = 0;
 };
 

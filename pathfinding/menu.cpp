@@ -12,10 +12,37 @@ namespace ui {
 			for (int j = 0; j < dim; j++) {
 				//std::cout << "The j, i coord is: (" << j << ", " << i << ")" << std::endl;
 				if (j != 9) {
-					gridFile << (grid[j][i].blocked ? "1" : "0") << ", ";
+					if (grid[j][i].blocked || grid[j][i].isGoal || grid[j][i].isRobotPos) {
+						if (grid[j][i].blocked) {
+							gridFile << "1" << ", ";
+						}
+						else if (grid[j][i].isGoal) {
+							gridFile << "2" << ", ";
+						}
+						else if (grid[j][i].isRobotPos) {
+							gridFile << "99" << ", ";
+						}
+					}
+					else {
+						gridFile << "0" << ", ";
+					}
 				}
 				else {
-					gridFile << (grid[j][i].blocked ? "1" : "0");
+					if (grid[j][i].blocked || grid[j][i].isGoal || grid[j][i].isRobotPos) {
+						if (grid[j][i].blocked) {
+							gridFile << "1";
+						}
+						else if (grid[j][i].isGoal) {
+							gridFile << "2";
+						}
+						else if (grid[j][i].isRobotPos) {
+							std::cout << "Found a robot position!" << std::endl;
+							gridFile << "99";
+						}
+					}
+					else {
+						gridFile << "0";
+					}
 				}
 				//gridFile << "(" << grid[j][i].x << ", " << grid[j][i].y << ") ";
 			}
